@@ -136,7 +136,7 @@ async function autoRecycleToBackend() {
   totalEarnings -= recycleUSD;
   totalRecycled += recycleUSD;
   
-  console.log(`♻️ Auto-recycled $${recycleUSD.toFixed(0)} → ${recycleETH} ETH to backend`);
+  console.log('♻️ Auto-recycled $' + recycleUSD.toFixed(0) + ' → ' + recycleETH + ' ETH to backend');
   
   return { 
     success: true, 
@@ -265,7 +265,7 @@ app.post('/credit-earnings', (req, res) => {
   
   if (addAmount > 0) {
     totalEarnings += addAmount;
-    console.log(`💰 Credited: $${addAmount.toFixed(2)} | Total: $${totalEarnings.toFixed(2)}`);
+    console.log('💰 Credited: $' + addAmount.toFixed(2) + ' | Total: $' + totalEarnings.toFixed(2));
   }
   
   res.json({
@@ -324,7 +324,7 @@ app.post('/send-to-coinbase', async (req, res) => {
     totalWithdrawnToCoinbase += usdAmount;
     totalEarnings = Math.max(0, totalEarnings - usdAmount);
     
-    console.log(`✅ Sent ${ethAmount} ETH to Coinbase: ${tx.hash}`);
+    console.log('✅ Sent ' + ethAmount + ' ETH to Coinbase: ' + tx.hash);
     
     res.json({
       success: true,
@@ -372,7 +372,7 @@ app.post('/send-to-backend', async (req, res) => {
     totalSentToBackend += usdAmount;
     totalEarnings = Math.max(0, totalEarnings - usdAmount);
     
-    console.log(`🏦 Allocated ${ethAmount} ETH to backend gas: $${usdAmount.toFixed(2)}`);
+    console.log('🏦 Allocated ' + ethAmount + ' ETH to backend gas: $' + usdAmount.toFixed(2));
     
     res.json({
       success: true,
@@ -430,7 +430,7 @@ app.post('/backend-to-coinbase', async (req, res) => {
     
     const receipt = await tx.wait();
     
-    console.log(`✅ Backend → Coinbase: ${ethAmount} ETH | TX: ${tx.hash}`);
+    console.log('✅ Backend → Coinbase: ' + ethAmount + ' ETH | TX: ' + tx.hash);
     
     res.json({
       success: true,
@@ -528,14 +528,14 @@ initProvider().then(async () => {
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('🚀 UNIFIED EARNINGS & WITHDRAWAL API v2.0');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log(`📡 Port: ${PORT}`);
+  console.log('📡 Port: ' + PORT);
   console.log('');
   console.log('💰 WALLET CONFIGURATION:');
-  console.log(`   Coinbase (YOUR wallet): ${COINBASE_WALLET}`);
-  console.log(`   Treasury (Gas wallet):  ${signer?.address || TREASURY_WALLET}`);
-  console.log(`   Treasury Balance:       ${balance.toFixed(6)} ETH`);
-  console.log(`   Flash Loan Amount:      ${FLASH_LOAN_AMOUNT} ETH`);
-  console.log(`   Auto-Recycle:           ${autoRecycleEnabled ? 'ENABLED' : 'DISABLED'}`);
+  console.log('   Coinbase (YOUR wallet): ' + COINBASE_WALLET);
+  console.log('   Treasury (Gas wallet):  ' + (signer ? signer.address : TREASURY_WALLET));
+  console.log('   Treasury Balance:       ' + balance.toFixed(6) + ' ETH');
+  console.log('   Flash Loan Amount:      ' + FLASH_LOAN_AMOUNT + ' ETH');
+  console.log('   Auto-Recycle:           ' + (autoRecycleEnabled ? 'ENABLED' : 'DISABLED'));
   console.log('');
   console.log('📡 COMPATIBLE WITH:');
   console.log('   - AI Auto Trader Real (pages/AIAutoTraderReal)');
@@ -556,6 +556,6 @@ initProvider().then(async () => {
   console.log('');
   
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Server listening on port ${PORT}`);
+    console.log('✅ Server listening on port ' + PORT);
   });
 });
