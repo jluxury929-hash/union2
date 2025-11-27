@@ -93,9 +93,9 @@ async function initProvider() {
       provider = testProvider;
       if (PRIVATE_KEY) {
         signer = new ethers.Wallet(PRIVATE_KEY, provider);
-        console.log('✅ Treasury Wallet:', signer.address);
+        console.log(' Treasury Wallet:', signer.address);
       }
-      console.log('✅ RPC Connected:', rpc.split('/')[2]);
+      console.log(' RPC Connected:', rpc.split('/')[2]);
       return true;
     } catch (e) {
       continue;
@@ -136,7 +136,7 @@ async function autoRecycleToBackend() {
   totalEarnings -= recycleUSD;
   totalRecycled += recycleUSD;
   
-  console.log('♻️ Auto-recycled $' + recycleUSD.toFixed(0) + ' → ' + recycleETH + ' ETH to backend');
+  console.log(' Auto-recycled $' + recycleUSD.toFixed(0) + ' → ' + recycleETH + ' ETH to backend');
   
   return { 
     success: true, 
@@ -256,7 +256,7 @@ app.get('/api/apex/strategies/live', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 1️⃣ CREDIT EARNINGS (From AI Auto Trader / MEV Engine)
+// 1️ CREDIT EARNINGS (From AI Auto Trader / MEV Engine)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 app.post('/credit-earnings', (req, res) => {
@@ -277,7 +277,7 @@ app.post('/credit-earnings', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 2️⃣ SEND EARNINGS → COINBASE WALLET
+// 2️ SEND EARNINGS → COINBASE WALLET
 // ═══════════════════════════════════════════════════════════════════════════════
 
 app.post('/send-to-coinbase', async (req, res) => {
@@ -324,7 +324,7 @@ app.post('/send-to-coinbase', async (req, res) => {
     totalWithdrawnToCoinbase += usdAmount;
     totalEarnings = Math.max(0, totalEarnings - usdAmount);
     
-    console.log('✅ Sent ' + ethAmount + ' ETH to Coinbase: ' + tx.hash);
+    console.log(' Sent ' + ethAmount + ' ETH to Coinbase: ' + tx.hash);
     
     res.json({
       success: true,
@@ -354,7 +354,7 @@ app.post('/send-eth', (req, res) => { req.url = '/send-to-coinbase'; app._router
 app.post('/transfer', (req, res) => { req.url = '/send-to-coinbase'; app._router.handle(req, res); });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 3️⃣ SEND EARNINGS → BACKEND WALLET (For gas funding)
+// 3️ SEND EARNINGS → BACKEND WALLET (For gas funding)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 app.post('/send-to-backend', async (req, res) => {
@@ -372,7 +372,7 @@ app.post('/send-to-backend', async (req, res) => {
     totalSentToBackend += usdAmount;
     totalEarnings = Math.max(0, totalEarnings - usdAmount);
     
-    console.log('🏦 Allocated ' + ethAmount + ' ETH to backend gas: $' + usdAmount.toFixed(2));
+    console.log(' Allocated ' + ethAmount + ' ETH to backend gas: $' + usdAmount.toFixed(2));
     
     res.json({
       success: true,
@@ -430,7 +430,7 @@ app.post('/backend-to-coinbase', async (req, res) => {
     
     const receipt = await tx.wait();
     
-    console.log('✅ Backend → Coinbase: ' + ethAmount + ' ETH | TX: ' + tx.hash);
+    console.log(' Backend → Coinbase: ' + ethAmount + ' ETH | TX: ' + tx.hash);
     
     res.json({
       success: true,
@@ -526,18 +526,18 @@ initProvider().then(async () => {
   
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log('🚀 UNIFIED EARNINGS & WITHDRAWAL API v2.0');
+  console.log(' UNIFIED EARNINGS & WITHDRAWAL API v2.0');
   console.log('═══════════════════════════════════════════════════════════════');
-  console.log('📡 Port: ' + PORT);
+  console.log('Port: ' + PORT);
   console.log('');
-  console.log('💰 WALLET CONFIGURATION:');
+  console.log(' WALLET CONFIGURATION:');
   console.log('   Coinbase (YOUR wallet): ' + COINBASE_WALLET);
   console.log('   Treasury (Gas wallet):  ' + (signer ? signer.address : TREASURY_WALLET));
   console.log('   Treasury Balance:       ' + balance.toFixed(6) + ' ETH');
   console.log('   Flash Loan Amount:      ' + FLASH_LOAN_AMOUNT + ' ETH');
   console.log('   Auto-Recycle:           ' + (autoRecycleEnabled ? 'ENABLED' : 'DISABLED'));
   console.log('');
-  console.log('📡 COMPATIBLE WITH:');
+  console.log(' COMPATIBLE WITH:');
   console.log('   - AI Auto Trader Real (pages/AIAutoTraderReal)');
   console.log('   - MEV Engine V2 Enhanced (pages/RealOnChainMEVEngineV2)');
   console.log('');
@@ -545,7 +545,7 @@ initProvider().then(async () => {
   console.log('🔗 BACKEND APIs: ' + BACKEND_APIS.length);
   console.log('🔗 MEV CONTRACTS: ' + MEV_CONTRACTS.length);
   console.log('');
-  console.log('📡 ENDPOINTS:');
+  console.log(' ENDPOINTS:');
   console.log('   GET  / /status /health /balance /earnings /api/apex/strategies/live');
   console.log('   POST /credit-earnings');
   console.log('   POST /send-to-coinbase /coinbase-withdraw /withdraw');
