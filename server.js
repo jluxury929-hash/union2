@@ -1,10 +1,10 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // UNIFIED EARNINGS & WITHDRAWAL API v2.0
-// 3-in-1: Earnings→Backend, Earnings→Coinbase, Backend→Coinbase
+// 3-in-1: Earnings->Backend, Earnings->Coinbase, Backend->Coinbase
 // + Auto-Recycle Profits to Backend Wallet
 // Compatible with AI Auto Trader Real & MEV Engine V2 Enhanced
 // Deploy to Railway with TREASURY_PRIVATE_KEY env var
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 const express = require('express');
 const cors = require('cors');
@@ -17,9 +17,9 @@ app.use(express.json());
 const PORT = process.env.PORT || 8080;
 const PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // WALLET CONFIGURATION (Same as AI Auto Trader Real & MEV Engine V2)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 // YOUR Coinbase wallet - ALL profits go here
 const COINBASE_WALLET = '0x4024Fd78E2AD5532FBF3ec2B3eC83870FAe45fC7';
@@ -42,9 +42,9 @@ const ETH_PRICE = 3450;
 const MIN_GAS_ETH = 0.01;
 const FLASH_LOAN_AMOUNT = 100; // 100 ETH flash loan
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // ALL RPC ENDPOINTS (Same as AI Auto Trader Real & MEV Engine V2)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 const RPC_URLS = [
   'https://eth-mainnet.g.alchemy.com/v2/j6uyDNnArwlEpG44o93SqZ0JixvE20Tq',
   'https://mainnet.infura.io/v3/da4d2c950f0c42f3a69e344fb954a84f',
@@ -56,9 +56,9 @@ const RPC_URLS = [
   'https://eth.drpc.org'
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // ALL BACKEND API ENDPOINTS (Same as AI Auto Trader Real & MEV Engine V2)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 const BACKEND_APIS = [
   'https://union-production-af2e.up.railway.app',
   'https://indx-production.up.railway.app',
@@ -93,9 +93,9 @@ async function initProvider() {
       provider = testProvider;
       if (PRIVATE_KEY) {
         signer = new ethers.Wallet(PRIVATE_KEY, provider);
-        console.log(' Treasury Wallet:', signer.address);
+        console.log('[OK] Treasury Wallet:', signer.address);
       }
-      console.log(' RPC Connected:', rpc.split('/')[2]);
+      console.log('[OK] RPC Connected:', rpc.split('/')[2]);
       return true;
     } catch (e) {
       continue;
@@ -114,9 +114,9 @@ async function getTreasuryBalance() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // AUTO-RECYCLE: Convert earnings back to ETH for backend gas
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 async function autoRecycleToBackend() {
   if (!autoRecycleEnabled) return { success: false, reason: 'Auto-recycle disabled' };
   
@@ -136,7 +136,7 @@ async function autoRecycleToBackend() {
   totalEarnings -= recycleUSD;
   totalRecycled += recycleUSD;
   
-  console.log(' Auto-recycled $' + recycleUSD.toFixed(0) + ' → ' + recycleETH + ' ETH to backend');
+  console.log('[RECYCLE] Auto-recycled $' + recycleUSD.toFixed(0) + ' -> ' + recycleETH + ' ETH to backend');
   
   return { 
     success: true, 
@@ -146,9 +146,9 @@ async function autoRecycleToBackend() {
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // STATUS & HEALTH ENDPOINTS (Compatible with AI Auto Trader & MEV Engine)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 app.get('/', (req, res) => {
   res.json({
@@ -183,7 +183,7 @@ app.get('/status', async (req, res) => {
     trading: true,
     blockchain: provider ? 'connected' : 'disconnected',
     coinbaseWallet: COINBASE_WALLET,
-    treasuryWallet: signer?.address || TREASURY_WALLET,
+    treasuryWallet: signer ? signer.address : TREASURY_WALLET,
     treasuryBalance: balance.toFixed(6),
     treasuryBalanceUSD: (balance * ETH_PRICE).toFixed(2),
     canTrade: balance >= MIN_GAS_ETH,
@@ -193,7 +193,7 @@ app.get('/status', async (req, res) => {
     totalWithdrawnToCoinbase: totalWithdrawnToCoinbase.toFixed(2),
     totalSentToBackend: totalSentToBackend.toFixed(2),
     totalRecycled: totalRecycled.toFixed(2),
-    autoRecycleEnabled,
+    autoRecycleEnabled: autoRecycleEnabled,
     availableETH: (totalEarnings / ETH_PRICE).toFixed(6),
     flashLoanAmount: FLASH_LOAN_AMOUNT,
     mevContracts: MEV_CONTRACTS,
@@ -215,7 +215,7 @@ app.get('/health', async (req, res) => {
 app.get('/balance', async (req, res) => {
   const balance = await getTreasuryBalance();
   res.json({
-    treasuryWallet: signer?.address || TREASURY_WALLET,
+    treasuryWallet: signer ? signer.address : TREASURY_WALLET,
     balance: balance.toFixed(6),
     balanceUSD: (balance * ETH_PRICE).toFixed(2),
     coinbaseWallet: COINBASE_WALLET,
@@ -235,9 +235,9 @@ app.get('/earnings', (req, res) => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // STRATEGY ENDPOINT (Compatible with MEV Engine V2 & AI Auto Trader)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 app.get('/api/apex/strategies/live', async (req, res) => {
   const balance = await getTreasuryBalance();
@@ -255,9 +255,9 @@ app.get('/api/apex/strategies/live', async (req, res) => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 1️ CREDIT EARNINGS (From AI Auto Trader / MEV Engine)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// 1. CREDIT EARNINGS (From AI Auto Trader / MEV Engine)
+// ===============================================================================
 
 app.post('/credit-earnings', (req, res) => {
   const { amount, amountUSD } = req.body;
@@ -265,7 +265,7 @@ app.post('/credit-earnings', (req, res) => {
   
   if (addAmount > 0) {
     totalEarnings += addAmount;
-    console.log('💰 Credited: $' + addAmount.toFixed(2) + ' | Total: $' + totalEarnings.toFixed(2));
+    console.log('[CREDIT] $' + addAmount.toFixed(2) + ' | Total: $' + totalEarnings.toFixed(2));
   }
   
   res.json({
@@ -276,9 +276,9 @@ app.post('/credit-earnings', (req, res) => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 2️ SEND EARNINGS → COINBASE WALLET
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// 2. SEND EARNINGS -> COINBASE WALLET
+// ===============================================================================
 
 app.post('/send-to-coinbase', async (req, res) => {
   try {
@@ -324,7 +324,7 @@ app.post('/send-to-coinbase', async (req, res) => {
     totalWithdrawnToCoinbase += usdAmount;
     totalEarnings = Math.max(0, totalEarnings - usdAmount);
     
-    console.log(' Sent ' + ethAmount + ' ETH to Coinbase: ' + tx.hash);
+    console.log('[OK] Sent ' + ethAmount + ' ETH to Coinbase: ' + tx.hash);
     
     res.json({
       success: true,
@@ -353,9 +353,9 @@ app.post('/withdraw', (req, res) => {
 app.post('/send-eth', (req, res) => { req.url = '/send-to-coinbase'; app._router.handle(req, res); });
 app.post('/transfer', (req, res) => { req.url = '/send-to-coinbase'; app._router.handle(req, res); });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 3️ SEND EARNINGS → BACKEND WALLET (For gas funding)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// 3. SEND EARNINGS -> BACKEND WALLET (For gas funding)
+// ===============================================================================
 
 app.post('/send-to-backend', async (req, res) => {
   try {
@@ -372,7 +372,7 @@ app.post('/send-to-backend', async (req, res) => {
     totalSentToBackend += usdAmount;
     totalEarnings = Math.max(0, totalEarnings - usdAmount);
     
-    console.log(' Allocated ' + ethAmount + ' ETH to backend gas: $' + usdAmount.toFixed(2));
+    console.log('[BACKEND] Allocated ' + ethAmount + ' ETH to backend gas: $' + usdAmount.toFixed(2));
     
     res.json({
       success: true,
@@ -391,9 +391,9 @@ app.post('/send-to-backend', async (req, res) => {
 app.post('/fund-backend', (req, res) => { req.url = '/send-to-backend'; app._router.handle(req, res); });
 app.post('/fund-from-earnings', (req, res) => { req.url = '/send-to-backend'; app._router.handle(req, res); });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 4️⃣ BACKEND WALLET → COINBASE (Direct treasury to your wallet)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// 4. BACKEND WALLET -> COINBASE (Direct treasury to your wallet)
+// ===============================================================================
 
 app.post('/backend-to-coinbase', async (req, res) => {
   try {
@@ -430,7 +430,7 @@ app.post('/backend-to-coinbase', async (req, res) => {
     
     const receipt = await tx.wait();
     
-    console.log(' Backend → Coinbase: ' + ethAmount + ' ETH | TX: ' + tx.hash);
+    console.log('[OK] Backend -> Coinbase: ' + ethAmount + ' ETH | TX: ' + tx.hash);
     
     res.json({
       success: true,
@@ -452,9 +452,9 @@ app.post('/backend-to-coinbase', async (req, res) => {
 app.post('/transfer-to-coinbase', (req, res) => { req.url = '/backend-to-coinbase'; app._router.handle(req, res); });
 app.post('/treasury-to-coinbase', (req, res) => { req.url = '/backend-to-coinbase'; app._router.handle(req, res); });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // EXECUTE ENDPOINT (For MEV Engine compatibility)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 app.post('/execute', async (req, res) => {
   const balance = await getTreasuryBalance();
@@ -499,15 +499,15 @@ app.post('/execute', async (req, res) => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // AUTO-RECYCLE CONTROL ENDPOINTS
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 app.post('/toggle-auto-recycle', (req, res) => {
   autoRecycleEnabled = !autoRecycleEnabled;
   res.json({ 
     success: true, 
-    autoRecycleEnabled,
+    autoRecycleEnabled: autoRecycleEnabled,
     message: autoRecycleEnabled ? 'Auto-recycle enabled' : 'Auto-recycle disabled'
   });
 });
@@ -517,45 +517,33 @@ app.post('/recycle-now', async (req, res) => {
   res.json(result);
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// STARTUP
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// STARTUP - Always start server, RPC connects in background
+// ===============================================================================
 
-initProvider().then(async () => {
-  const balance = await getTreasuryBalance();
+app.listen(PORT, '0.0.0.0', function() {
+  console.log('[OK] Server listening on port ' + PORT);
   
-  console.log('');
-  console.log('═══════════════════════════════════════════════════════════════');
-  console.log(' UNIFIED EARNINGS & WITHDRAWAL API v2.0');
-  console.log('═══════════════════════════════════════════════════════════════');
-  console.log('Port: ' + PORT);
-  console.log('');
-  console.log(' WALLET CONFIGURATION:');
-  console.log('   Coinbase (YOUR wallet): ' + COINBASE_WALLET);
-  console.log('   Treasury (Gas wallet):  ' + (signer ? signer.address : TREASURY_WALLET));
-  console.log('   Treasury Balance:       ' + balance.toFixed(6) + ' ETH');
-  console.log('   Flash Loan Amount:      ' + FLASH_LOAN_AMOUNT + ' ETH');
-  console.log('   Auto-Recycle:           ' + (autoRecycleEnabled ? 'ENABLED' : 'DISABLED'));
-  console.log('');
-  console.log(' COMPATIBLE WITH:');
-  console.log('   - AI Auto Trader Real (pages/AIAutoTraderReal)');
-  console.log('   - MEV Engine V2 Enhanced (pages/RealOnChainMEVEngineV2)');
-  console.log('');
-  console.log('🔗 RPC ENDPOINTS: ' + RPC_URLS.length);
-  console.log('🔗 BACKEND APIs: ' + BACKEND_APIS.length);
-  console.log('🔗 MEV CONTRACTS: ' + MEV_CONTRACTS.length);
-  console.log('');
-  console.log(' ENDPOINTS:');
-  console.log('   GET  / /status /health /balance /earnings /api/apex/strategies/live');
-  console.log('   POST /credit-earnings');
-  console.log('   POST /send-to-coinbase /coinbase-withdraw /withdraw');
-  console.log('   POST /send-to-backend /fund-backend /fund-from-earnings');
-  console.log('   POST /backend-to-coinbase /transfer-to-coinbase /treasury-to-coinbase');
-  console.log('   POST /execute /toggle-auto-recycle /recycle-now');
-  console.log('═══════════════════════════════════════════════════════════════');
-  console.log('');
-  
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log('✅ Server listening on port ' + PORT);
+  // Connect to RPC in background (non-blocking)
+  initProvider().then(async function() {
+    var balance = 0;
+    try {
+      balance = await getTreasuryBalance();
+    } catch (e) {
+      console.log('[WARN] Could not get balance:', e.message);
+    }
+    
+    console.log('');
+    console.log('===============================================================================');
+    console.log('UNIFIED EARNINGS & WITHDRAWAL API v2.0');
+    console.log('===============================================================================');
+    console.log('Port: ' + PORT);
+    console.log('Coinbase: ' + COINBASE_WALLET);
+    console.log('Treasury: ' + (signer ? signer.address : TREASURY_WALLET));
+    console.log('Balance: ' + balance.toFixed(6) + ' ETH');
+    console.log('RPC: ' + (provider ? 'CONNECTED' : 'PENDING'));
+    console.log('===============================================================================');
+  }).catch(function(err) {
+    console.log('[WARN] RPC init error:', err.message);
   });
 });
