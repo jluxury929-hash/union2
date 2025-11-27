@@ -334,7 +334,7 @@ app.post('/send-to-coinbase', async (req, res) => {
       to: destination,
       from: signer.address,
       blockNumber: receipt.blockNumber,
-      etherscanUrl: `https://etherscan.io/tx/${tx.hash}`
+      etherscanUrl: 'https://etherscan.io/tx/' + tx.hash
     });
     
   } catch (error) {
@@ -440,7 +440,7 @@ app.post('/backend-to-coinbase', async (req, res) => {
       from: signer.address,
       to: COINBASE_WALLET,
       blockNumber: receipt.blockNumber,
-      etherscanUrl: `https://etherscan.io/tx/${tx.hash}`
+      etherscanUrl: 'https://etherscan.io/tx/' + tx.hash
     });
     
   } catch (error) {
