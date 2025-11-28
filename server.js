@@ -1,9 +1,10 @@
 // ===============================================================================
-// UNIFIED EARNINGS & WITHDRAWAL API v2.0
+// UNIFIED EARNINGS & WITHDRAWAL API v2.1 (FIXED RPC)
 // 3-in-1: Earnings->Backend, Earnings->Coinbase, Backend->Coinbase
 // + Auto-Recycle Profits to Backend Wallet
 // Compatible with AI Auto Trader Real & MEV Engine V2 Enhanced
 // Deploy to Railway with TREASURY_PRIVATE_KEY env var
+// FIX: Uses simple sequential RPC testing - no FallbackProvider
 // ===============================================================================
 
 const express = require('express');
@@ -43,17 +44,17 @@ const MIN_GAS_ETH = 0.01;
 const FLASH_LOAN_AMOUNT = 100; // 100 ETH flash loan
 
 // ===============================================================================
-// ALL RPC ENDPOINTS (Same as AI Auto Trader Real & MEV Engine V2)
+// RPC ENDPOINTS - RELIABLE PUBLIC RPCS (NO API KEY REQUIRED)
 // ===============================================================================
 const RPC_URLS = [
-  'https://eth-mainnet.g.alchemy.com/v2/j6uyDNnArwlEpG44o93SqZ0JixvE20Tq',
-  'https://mainnet.infura.io/v3/da4d2c950f0c42f3a69e344fb954a84f',
-  'https://eth.llamarpc.com',
+  'https://ethereum-rpc.publicnode.com',
+  'https://eth.drpc.org',
   'https://rpc.ankr.com/eth',
-  'https://ethereum.publicnode.com',
+  'https://eth.llamarpc.com',
   'https://1rpc.io/eth',
   'https://eth-mainnet.public.blastapi.io',
-  'https://eth.drpc.org'
+  'https://cloudflare-eth.com',
+  'https://rpc.builder0x69.io'
 ];
 
 // ===============================================================================
@@ -85,22 +86,37 @@ let totalSentToBackend = 0;
 let totalRecycled = 0;
 let autoRecycleEnabled = true;
 
+// ===============================================================================
+// PROVIDER INITIALIZATION WITH FALLBACK
+// ===============================================================================
 async function initProvider() {
-  for (const rpc of RPC_URLS) {
+  for (const rpcUrl of RPC_URLS) {
     try {
-      const testProvider = new ethers.JsonRpcProvider(rpc);
-      await testProvider.getBlockNumber();
+      console.log('🔗 Trying RPC: ' + rpcUrl + '...');
+      const testProvider = new ethers.JsonRpcProvider(rpcUrl, 1, { 
+        staticNetwork: ethers.Network.from(1),
+        batchMaxCount: 1
+      });
+      
+      const blockNum = await Promise.race([
+        testProvider.getBlockNumber(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+      ]);
+      
+      console.log('✅ Connected at block: ' + blockNum);
       provider = testProvider;
+      
       if (PRIVATE_KEY) {
         signer = new ethers.Wallet(PRIVATE_KEY, provider);
-        console.log('[OK] Treasury Wallet:', signer.address);
+        console.log('💰 Wallet: ' + signer.address);
       }
-      console.log('[OK] RPC Connected:', rpc.split('/')[2]);
       return true;
     } catch (e) {
+      console.log('❌ Failed: ' + e.message.substring(0, 50));
       continue;
     }
   }
+  console.error('❌ All RPC endpoints failed');
   return false;
 }
 
